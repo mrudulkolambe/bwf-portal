@@ -13,7 +13,10 @@ import { OlaMapsPicker } from "@/components/app/ola-maps-picker"
 import { Label } from "@/components/ui/label"
 import { FileUp, CreditCard } from "lucide-react"
 
+import { useRouter } from 'next/navigation'
+ 
 const OnboardPartner = () => {
+    const router = useRouter()
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const [imageKey, setImageKey] = useState(0)
     const [selectedService, setSelectedService] = useState<string>('')
@@ -52,6 +55,9 @@ const OnboardPartner = () => {
             aadharImage,
             panImage
         })
+        
+        // Simulate navigation to dashboard
+        router.push('/partner/dashboard')
     }
 
     return (

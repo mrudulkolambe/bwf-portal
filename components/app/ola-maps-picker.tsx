@@ -57,18 +57,36 @@ export const OlaMapsPicker: React.FC<OlaMapsPickerProps> = ({
 
             mapInstanceRef.current = map
 
+            // Silence "styleimagemissing" errors by injecting a blank 1x1 pixel
+            map.on('styleimagemissing', (e: any) => {
+                const id = e.id;
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const context = canvas.getContext('2d');
+                if (context) {
+                    const data = context.getImageData(0, 0, 1, 1);
+                    map.addImage(id, data);
+                }
+            });
+
             map.on('load', () => {
-                // Hide POI layers to remove "charger and other stuff" and fix missing icon errors
+                // Hide POI and 3D layers to remove clutter and fix missing asset/layer errors
                 const layers = map.getStyle().layers
                 layers?.forEach((layer: any) => {
+                    const id = layer.id.toLowerCase()
                     if (
-                        layer.id.includes('poi') ||
-                        layer.id.includes('place') ||
-                        layer.id.includes('transit') ||
-                        layer.id.includes('charger') ||
-                        layer.id.includes('docking')
+                        id.includes('poi') ||
+                        id.includes('place') ||
+                        id.includes('transit') ||
+                        id.includes('charger') ||
+                        id.includes('docking') ||
+                        id.includes('3d_model') ||
+                        id.includes('data')
                     ) {
-                        map.setLayoutProperty(layer.id, 'visibility', 'none')
+                        if (map.getLayer(layer.id)) {
+                            map.setLayoutProperty(layer.id, 'visibility', 'none')
+                        }
                     }
                 })
             })
