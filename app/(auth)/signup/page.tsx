@@ -4,10 +4,11 @@ import React, { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AppInput } from "@/components/app/input"
-import Link from 'next/link'
 
-const PartnerLogin = () => {
+const PartnerSignup = () => {
     const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         phone: '',
         password: ''
     })
@@ -19,21 +20,40 @@ const PartnerLogin = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log('Login Data:', formData)
+        console.log('Signup Data:', formData)
     }
 
     return (
         <div className="flex min-h-svh flex-col items-center justify-center bg-background p-0 md:p-10">
-            <div className="w-full max-w-[450px]">
+            <div className="w-full max-w-[850px]">
                 <Card className="md:border-border border-none shadow-none rounded-2xl p-0">
                     <CardContent className="p-0">
                         <form onSubmit={handleSubmit} className="grid grid-cols-1">
                             <div className="flex flex-col p-4 md:p-12 justify-center">
                                 <div className="space-y-1 text-left mb-8">
-                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
-                                    <p className="text-sm text-muted-foreground">Login to your Partner account</p>
+                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">Create an account</h1>
+                                    <p className="text-sm text-muted-foreground">Join the BWF Partner network</p>
                                 </div>
                                 <div className="grid gap-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <AppInput
+                                            id="firstName"
+                                            label="First name"
+                                            placeholder="John"
+                                            className="h-11 shadow-sm"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                        />
+                                        <AppInput
+                                            id="lastName"
+                                            label="Last name"
+                                            placeholder="Doe"
+                                            className="h-11 shadow-sm"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
                                     <AppInput
                                         id="phone"
                                         type="tel"
@@ -50,26 +70,19 @@ const PartnerLogin = () => {
                                         label="Password"
                                         placeholder="Enter your password"
                                         className="h-11 shadow-sm"
-                                        labelExtra={
-                                            <a href="#" className="text-xs text-muted-foreground hover:text-foreground font-medium underline underline-offset-4 transition-colors">
-                                                Forgot your password?
-                                            </a>
-                                        }
                                         value={formData.password}
                                         onChange={handleChange}
                                     />
 
-                                    <Link href={"/onboard"}>
-                                        <Button className="w-full">
-                                            Login
-                                        </Button>
-                                    </Link>
+                                    <Button type="submit" className="w-full">
+                                        Sign Up
+                                    </Button>
                                 </div>
 
                                 <div className="mt-8 text-center text-sm">
-                                    <span className="text-muted-foreground">Don&apos;t have an account? </span>
-                                    <a href="/signup" className="font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors">
-                                        Sign up
+                                    <span className="text-muted-foreground">Already have an account? </span>
+                                    <a href="/" className="font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors">
+                                        Log in
                                     </a>
                                 </div>
                             </div>
@@ -86,7 +99,4 @@ const PartnerLogin = () => {
     )
 }
 
-export default PartnerLogin
-
-
-
+export default PartnerSignup
