@@ -19,18 +19,21 @@ import { cn } from "@/lib/utils"
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ProductCard } from "@/components/app/product-card"
+import { LanguageSwitcher } from "@/components/app/language-switcher"
+import { useTranslation } from "@/components/providers/language-provider"
 
 const PartnerDashboard = () => {
+    const { t } = useTranslation()
     const router = useRouter()
     const [isAvailable, setIsAvailable] = React.useState(true)
 
-    // Dummy Stats
-    const stats = [
-        { label: "Customers Attended", value: "124", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-        { label: "Service Calls", value: "48", icon: PhoneCall, color: "text-green-600", bg: "bg-green-50" },
-        { label: "Partner Rating", value: "4.8", icon: Star, color: "text-yellow-600", bg: "bg-yellow-50" },
-        { label: "Monthly Growth", value: "+12%", icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
-    ]
+    // Translated Stats
+    const stats = React.useMemo(() => [
+        { label: t('dashboard.stats.customers'), value: "124", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+        { label: t('dashboard.stats.calls'), value: "48", icon: PhoneCall, color: "text-green-600", bg: "bg-green-50" },
+        { label: t('dashboard.stats.rating'), value: "4.8", icon: Star, color: "text-yellow-600", bg: "bg-yellow-50" },
+        { label: t('dashboard.stats.growth'), value: "+12%", icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
+    ], [t])
 
     // Flatten all products with their category keys for the dashboard view
     const featuredProducts = React.useMemo(() => {
@@ -46,14 +49,14 @@ const PartnerDashboard = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                         <div className="flex items-center gap-6">
-                            <h1 className="text-2xl font-semibold text-foreground">Overview</h1>
+                            <h1 className="text-2xl font-semibold text-foreground">{t('dashboard.overview')}</h1>
 
                             <div className="flex items-center gap-2 bg-secondary/50 p-2 rounded-2xl border border-border/50">
                                 <span className={cn(
                                     "text-[10px] font-semibold px-2 transition-colors",
                                     isAvailable ? "text-emerald-600" : "text-muted-foreground"
                                 )}>
-                                    {isAvailable ? "Available" : "On Break"}
+                                    {isAvailable ? t('dashboard.available') : t('dashboard.on_break')}
                                 </span>
                                 <button
                                     onClick={() => setIsAvailable(!isAvailable)}
@@ -69,7 +72,13 @@ const PartnerDashboard = () => {
                                 </button>
                             </div>
                         </div>
-                        <p className="text-muted-foreground italic font-medium">Welcome back! Here's what's happening today.</p>
+                        <p className="text-muted-foreground italic font-medium">{t('dashboard.welcome_msg')}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <LanguageSwitcher />
+                        <Button size="sm" className="h-9 px-5 rounded-xl shadow-lg shadow-primary/20 font-semibold transition-all">
+                            {t('common.support')}
+                        </Button>
                     </div>
                 </div>
 
@@ -99,13 +108,13 @@ const PartnerDashboard = () => {
                         <div className="space-y-1">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <ShoppingBag className="w-5 h-5 text-primary" />
-                                Product Marketplace
+                                {t('dashboard.marketplace_heading')}
                             </h2>
-                            <p className="text-xs text-muted-foreground italic font-medium">Certified equipment and services for your business.</p>
+                            <p className="text-xs text-muted-foreground italic font-medium">{t('dashboard.marketplace_sub')}</p>
                         </div>
                         <Link href="/partner/marketplace">
                             <Button variant="ghost" size="sm" className="text-primary font-semibold hover:bg-primary/5 rounded-xl">
-                                View All Items
+                                {t('common.view_all')}
                             </Button>
                         </Link>
                     </div>

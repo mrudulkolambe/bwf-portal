@@ -14,8 +14,11 @@ import { Label } from "@/components/ui/label"
 import { FileUp, CreditCard } from "lucide-react"
 
 import { useRouter } from 'next/navigation'
+import { useTranslation } from "@/components/providers/language-provider"
+import { LanguageSwitcher } from "@/components/app/language-switcher"
  
 const OnboardPartner = () => {
+    const { t } = useTranslation()
     const router = useRouter()
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const [imageKey, setImageKey] = useState(0)
@@ -67,9 +70,12 @@ const OnboardPartner = () => {
                     <CardContent className="p-0">
                         <form onSubmit={handleSubmit} className="grid grid-cols-1">
                             <div className="flex flex-col p-4 md:p-12 justify-center text-left">
-                                <div className="space-y-1 mb-8">
-                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome to the Network</h1>
-                                    <p className="text-sm text-muted-foreground">Complete your profile to start offering services</p>
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="space-y-1">
+                                        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t('auth.onboarding_title')}</h1>
+                                        <p className="text-sm text-muted-foreground">{t('auth.onboarding_subtitle')}</p>
+                                    </div>
+                                    <LanguageSwitcher />
                                 </div>
 
                                 <div className="grid gap-8">
@@ -106,15 +112,15 @@ const OnboardPartner = () => {
                                             />
                                         </div>
                                         <div className="text-center">
-                                            <h2 className="text-lg font-semibold text-foreground">Add Business Logo</h2>
-                                            <p className="text-xs text-muted-foreground">Recommended: Square image, max 2MB</p>
+                                            <h2 className="text-lg font-semibold text-foreground">{t('auth.add_logo')}</h2>
+                                            <p className="text-xs text-muted-foreground">{t('auth.logo_hint')}</p>
                                         </div>
                                     </div>
 
                                     {/* Business Name Field */}
                                     <AppInput
                                         id="businessName"
-                                        label="Business Name"
+                                        label={t('auth.business_name')}
                                         placeholder="Enter your business or brand name"
                                         className="h-11 shadow-sm"
                                         value={businessName}
@@ -125,7 +131,7 @@ const OnboardPartner = () => {
                                     {/* Service Type Selection Dropdown */}
                                     <AppSelect
                                         variant='searchable'
-                                        label="Type of Service"
+                                        label={t('auth.service_type')}
                                         clearable={false}
                                         placeholder="Search and select service..."
                                         options={PARTNER_SERVICES.map(s => ({ ...s, subText: s.description }))}
@@ -134,7 +140,7 @@ const OnboardPartner = () => {
                                     />
 
                                     <div className="space-y-2">
-                                        <Label className="text-sm font-medium text-zinc-700">Business Location</Label>
+                                        <Label className="text-sm font-medium text-zinc-700">{t('auth.business_location')}</Label>
                                         <OlaMapsPicker
                                             value={location}
                                             onChange={setLocation}
@@ -142,7 +148,7 @@ const OnboardPartner = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <Label className="text-sm font-medium text-zinc-700">Identity Verification</Label>
+                                        <Label className="text-sm font-medium text-zinc-700">{t('auth.identity_verification')}</Label>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {/* Aadhar Upload */}
                                             <div className="flex flex-col gap-2">
@@ -155,7 +161,7 @@ const OnboardPartner = () => {
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors text-center p-4">
                                                             <CreditCard className="w-6 h-6" />
-                                                            <span className="text-[10px] font-semibold uppercase tracking-wider">Aadhaar Front</span>
+                                                            <span className="text-[10px] font-semibold uppercase tracking-wider">{t('auth.aadhar_front')}</span>
                                                         </div>
                                                     )}
                                                     <input
@@ -181,7 +187,7 @@ const OnboardPartner = () => {
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors text-center p-4">
                                                             <CreditCard className="w-6 h-6" />
-                                                            <span className="text-[10px] font-semibold uppercase tracking-wider">PAN Card</span>
+                                                            <span className="text-[10px] font-semibold uppercase tracking-wider">{t('auth.pan_card')}</span>
                                                         </div>
                                                     )}
                                                     <input
@@ -198,8 +204,8 @@ const OnboardPartner = () => {
                                         </div>
                                     </div>
 
-                                    <Button type="submit" className="w-full" disabled={!selectedService || !businessName}>
-                                        Complete Onboarding
+                                    <Button type="submit" className="w-full h-11 rounded-xl shadow-lg shadow-primary/20 font-semibold" disabled={!selectedService || !businessName}>
+                                        {t('auth.complete_onboarding')}
                                     </Button>
                                 </div>
                             </div>
@@ -207,9 +213,9 @@ const OnboardPartner = () => {
                     </CardContent>
                 </Card>
                 <div className="mt-8 text-center text-[12px] text-muted-foreground max-w-sm mx-auto">
-                    By clicking continue, you agree to our{" "}
-                    <a href="#" className="underline hover:text-foreground transition-colors">Terms of Service</a> and{" "}
-                    <a href="#" className="underline hover:text-foreground transition-colors">Privacy Policy</a>.
+                    {t('auth.terms_text')}{" "}
+                    <a href="#" className="underline hover:text-foreground transition-colors">{t('auth.terms_link')}</a> and{" "}
+                    <a href="#" className="underline hover:text-foreground transition-colors">{t('auth.privacy_link')}</a>.
                 </div>
             </div>
         </div>

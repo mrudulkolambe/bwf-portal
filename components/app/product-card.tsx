@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ShoppingBag } from "lucide-react"
 import { PARTNER_SERVICES } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/components/providers/language-provider"
 
 interface ProductCardProps {
     product: {
@@ -19,6 +20,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+    const { t } = useTranslation()
     return (
         <Card className="group overflow-hidden border border-border/60 hover:border-primary/50 rounded-3xl transition-all hover:shadow-2xl hover:shadow-primary/5 duration-500 bg-background/50 backdrop-blur-sm">
             <div className="aspect-video md:aspect-4/3 bg-muted flex items-center justify-center relative group-hover:bg-muted/30 transition-colors overflow-hidden">
@@ -46,7 +48,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         <span className="text-xl md:text-lg font-semibold text-zinc-900">₹{product.price.toLocaleString()}</span>
                     </div>
                     <Button size="sm" className="h-9 md:h-10 px-4 md:px-6 rounded-xl font-semibold text-xs transition-all shadow-md">
-                        Add to Cart
+                        {t('common.add_to_cart')}
                     </Button>
                 </div>
             </CardContent>

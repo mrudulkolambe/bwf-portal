@@ -18,8 +18,11 @@ import { cn } from "@/lib/utils"
 import Link from 'next/link'
 import { AppInput } from "@/components/app/input"
 import { ProductCard } from "@/components/app/product-card"
+import { useTranslation } from "@/components/providers/language-provider"
+import { LanguageSwitcher } from "@/components/app/language-switcher"
 
 const MarketplacePage = () => {
+    const { t } = useTranslation()
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
     const [isSearching, setIsSearching] = useState(false)
@@ -54,9 +57,10 @@ const MarketplacePage = () => {
                         <div className="p-1.5 rounded-xl group-hover:bg-primary/5 transition-colors">
                             <ArrowLeft className="w-3.5 h-3.5" />
                         </div>
-                        <span className="text-[13px] font-semibold tracking-tight">Back to dashboard</span>
+                        <span className="text-[13px] font-semibold tracking-tight">{t('common.back_to_dashboard')}</span>
                     </Link>
                     <div className="flex items-center gap-4">
+                        <LanguageSwitcher />
                         <div className="relative">
                             <ShoppingBag className="w-6 h-6 text-foreground" />
                             <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[10px] font-black text-white flex items-center justify-center rounded-full border-2 border-background">
@@ -71,9 +75,9 @@ const MarketplacePage = () => {
                     <div className="space-y-2">
                         <h1 className="text-2xl font-semibold flex items-center gap-3">
                             <Store className="w-6 h-6 text-primary" />
-                            Marketplace
+                            {t('marketplace.title')}
                         </h1>
-                        <p className="text-zinc-500 font-medium text-xs leading-relaxed">Equip your business with the best-in-class badminton essentials.</p>
+                        <p className="text-zinc-500 font-medium text-xs leading-relaxed">{t('marketplace.subtitle')}</p>
                     </div>
 
                     <div className="relative max-w-2xl group">
@@ -86,7 +90,7 @@ const MarketplacePage = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onFocus={() => setIsSearching(true)}
                             onBlur={() => setIsSearching(false)}
-                            placeholder="Search rackets, shuttlecocks, coaching gear..."
+                            placeholder={t('common.search_placeholder')}
                             className="h-11 pl-12 pr-4 bg-zinc-50 border-zinc-200 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
                         />
                     </div>
@@ -124,11 +128,11 @@ const MarketplacePage = () => {
                             <Search className="w-12 h-12 text-muted-foreground/30" />
                         </div>
                         <div className="text-center">
-                            <h3 className="text-xl font-bold">No products found</h3>
-                            <p className="text-muted-foreground">Try adjusting your search or filters.</p>
+                            <h3 className="text-xl font-bold">{t('marketplace.no_results')}</h3>
+                            <p className="text-muted-foreground">{t('marketplace.try_adjusting')}</p>
                         </div>
                         <Button variant="outline" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }} className="rounded-2xl">
-                            Clear All Filters
+                            {t('marketplace.clear_filters')}
                         </Button>
                     </div>
                 )}
