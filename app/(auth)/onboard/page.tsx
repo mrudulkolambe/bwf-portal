@@ -16,7 +16,7 @@ import { FileUp, CreditCard } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { useTranslation } from "@/components/providers/language-provider"
 import { LanguageSwitcher } from "@/components/app/language-switcher"
- 
+
 const OnboardPartner = () => {
     const { t } = useTranslation()
     const router = useRouter()
@@ -58,7 +58,7 @@ const OnboardPartner = () => {
             aadharImage,
             panImage
         })
-        
+
         // Simulate navigation to dashboard
         router.push('/partner/dashboard')
     }
@@ -204,7 +204,7 @@ const OnboardPartner = () => {
                                         </div>
                                     </div>
 
-                                    <Button type="submit" className="w-full h-11 rounded-xl shadow-lg shadow-primary/20 font-semibold" disabled={!selectedService || !businessName}>
+                                    <Button type="submit" className="w-full h-11" disabled={!selectedService || !businessName}>
                                         {t('auth.complete_onboarding')}
                                     </Button>
                                 </div>

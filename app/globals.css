@@ -126,5 +126,9 @@
   }
   html {
     @apply font-sans;
+    touch-action: manipulation;
+  }
+  input, select, textarea {
+    font-size: 16px !important;
   }
 }

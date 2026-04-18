@@ -19,7 +19,6 @@ import { cn } from "@/lib/utils"
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ProductCard } from "@/components/app/product-card"
-import { LanguageSwitcher } from "@/components/app/language-switcher"
 import { useTranslation } from "@/components/providers/language-provider"
 
 const PartnerDashboard = () => {
@@ -43,42 +42,40 @@ const PartnerDashboard = () => {
     }, [])
 
     return (
-        <div className="min-h-screen bg-background border-l border-border/40">
-            <div className="p-4 md:p-10 space-y-6 md:space-y-10 max-w-7xl mx-auto">
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="min-h-screen bg-background">
+            <div className="p-4 md:p-10 space-y-8 md:space-y-12 max-w-7xl mx-auto">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="space-y-1">
-                        <div className="flex items-center gap-6">
-                            <h1 className="text-2xl font-semibold text-foreground">{t('dashboard.overview')}</h1>
-
-                            <div className="flex items-center gap-2 bg-secondary/50 p-2 rounded-2xl border border-border/50">
-                                <span className={cn(
-                                    "text-[10px] font-semibold px-2 transition-colors",
-                                    isAvailable ? "text-emerald-600" : "text-muted-foreground"
-                                )}>
-                                    {isAvailable ? t('dashboard.available') : t('dashboard.on_break')}
-                                </span>
-                                <button
-                                    onClick={() => setIsAvailable(!isAvailable)}
-                                    className={cn(
-                                        "relative w-10 h-5 rounded-full transition-all duration-300 outline-none focus:ring-2 focus:ring-primary/20",
-                                        isAvailable ? "bg-emerald-500" : "bg-zinc-300"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-all duration-300 shadow-sm",
-                                        isAvailable ? "translate-x-5" : "translate-x-0"
-                                    )} />
-                                </button>
-                            </div>
-                        </div>
-                        <p className="text-muted-foreground italic font-medium">{t('dashboard.welcome_msg')}</p>
+                        <h1 className="text-2xl font-semibold tracking-tight text-foreground/90">
+                            {t('dashboard.welcome_msg')}
+                        </h1>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <LanguageSwitcher />
-                        <Button size="sm" className="h-9 px-5 rounded-xl shadow-lg shadow-primary/20 font-semibold transition-all">
-                            {t('common.support')}
-                        </Button>
+
+                    <div className="flex items-center gap-2 bg-secondary/30 p-1.5 rounded-2xl border border-border/40 backdrop-blur-sm">
+                        <button
+                            onClick={() => setIsAvailable(true)}
+                            className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-500",
+                                isAvailable
+                                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            <div className={cn("w-1.5 h-1.5 rounded-full bg-white transition-all duration-500", !isAvailable && "scale-0 opacity-0")} />
+                            {t('dashboard.available')}
+                        </button>
+                        <button
+                            onClick={() => setIsAvailable(false)}
+                            className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-500",
+                                !isAvailable
+                                    ? "bg-zinc-800 text-white shadow-lg shadow-zinc-800/20 dark:bg-zinc-200 dark:text-zinc-900"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            <div className={cn("w-1.5 h-1.5 rounded-full bg-white dark:bg-zinc-900 transition-all duration-500", isAvailable && "scale-0 opacity-0")} />
+                            {t('dashboard.on_break')}
+                        </button>
                     </div>
                 </div>
 

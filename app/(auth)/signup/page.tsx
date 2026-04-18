@@ -74,7 +74,7 @@ const PartnerSignup = () => {
                                         onChange={handleChange}
                                     />
 
-                                    <Button type="submit" className="w-full">
+                                    <Button type="submit" className="w-full h-11">
                                         Sign Up
                                     </Button>
                                 </div>

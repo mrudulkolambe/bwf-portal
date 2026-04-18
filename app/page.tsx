@@ -60,7 +60,7 @@ const PartnerLogin = () => {
                                     />
 
                                     <Link href={"/onboard"}>
-                                        <Button className="w-full">
+                                        <Button className="w-full h-11">
                                             Login
                                         </Button>
                                     </Link>

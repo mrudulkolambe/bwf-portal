@@ -1,10 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
 const instrumentSans = Instrument_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/components/providers/language-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function RootLayout({
   children,
@@ -25,7 +32,9 @@ export default function RootLayout({
     >
       <body cz-shortcut-listen="true" className={"min-h-full flex flex-col " + instrumentSans.className}>
         <LanguageProvider>
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </LanguageProvider>
       </body>
     </html>

@@ -11,9 +11,13 @@ export const en = {
     add_to_cart: "Add to Cart",
     add: "Add",
     price: "Price",
-    view_all: "View All Items",
+    view_all: "View All",
     support_team: "Support",
     loading: "Loading...",
+    profile: "Profile",
+    logout: "Logout",
+    main_menu: "Main Menu",
+    view_profile: "View Profile",
   },
   auth: {
     onboarding_title: "Welcome to the Network",
@@ -33,7 +37,7 @@ export const en = {
   },
   dashboard: {
     overview: "Overview",
-    welcome_msg: "Welcome back! Here's what's happening today.",
+    welcome_msg: "Welcome back!",
     available: "Available",
     on_break: "On Break",
     stats: {
@@ -71,6 +75,10 @@ export const mr: Dictionary = {
     view_all: "सर्व पहा",
     support_team: "मदत",
     loading: "लोड होत आहे...",
+    profile: "प्रोफाइल",
+    logout: "लॉगआउट",
+    main_menu: "मुख्य मेनू",
+    view_profile: "प्रोफाइल पहा",
   },
   auth: {
     onboarding_title: "नेटवर्कमध्ये तुमचे स्वागत आहे",
@@ -90,7 +98,7 @@ export const mr: Dictionary = {
   },
   dashboard: {
     overview: "आढावा",
-    welcome_msg: "पुन्हा स्वागत आहे! आज काय घडत आहे ते पहा.",
+    welcome_msg: "पुन्हा स्वागत आहे!",
     available: "उपलब्ध",
     on_break: "ब्रेकवर",
     stats: {
@@ -128,6 +136,10 @@ export const hi: Dictionary = {
     view_all: "सभी देखें",
     support_team: "सहायता",
     loading: "लोड हो रहा है...",
+    profile: "प्रोफाइल",
+    logout: "लॉगआउट",
+    main_menu: "मुख्य मेनू",
+    view_profile: "प्रोफाइल देखें",
   },
   auth: {
     onboarding_title: "नेटवर्क में आपका स्वागत है",
@@ -147,7 +159,7 @@ export const hi: Dictionary = {
   },
   dashboard: {
     overview: "अवलोकन",
-    welcome_msg: "वापसी पर स्वागत है! देखें आज क्या हो रहा है।",
+    welcome_msg: "वापसी पर स्वागत है!",
     available: "उपलब्ध",
     on_break: "ब्रेक पर",
     stats: {
