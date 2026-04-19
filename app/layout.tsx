@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -31,6 +32,13 @@ export default function RootLayout({
       lang="en"
       className={cn("h-full")}
     >
+      <head>
+        <Script
+          id="msg91-otp-script"
+          src="https://verify.msg91.com/otp-provider.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body cz-shortcut-listen="true" className={"min-h-full flex flex-col " + instrumentSans.className}>
         <LanguageProvider>
           <TooltipProvider>
@@ -42,4 +50,5 @@ export default function RootLayout({
     </html>
   );
 }
+
 

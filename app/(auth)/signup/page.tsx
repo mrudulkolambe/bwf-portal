@@ -7,17 +7,39 @@ import { AppInput } from "@/components/app/input"
 import AuthService from "@/service/auth.service"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useMsg91 } from "@/hooks/use-msg91"
 
 const PartnerSignup = () => {
     const router = useRouter()
-    const [step, setStep] = useState<'details' | 'otp'>('details')
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        phone: '',
-        otp: ''
+        phone: ''
     })
+
+    // Initialize MSG91
+    const { sendOtp } = useMsg91(
+        async (msg91Data) => {
+            setLoading(true);
+            await AuthService.verifyOtp(
+                {
+                    phoneNumber: formData.phone,
+                    otp: msg91Data,
+                },
+                setLoading,
+                () => {
+                    toast.success("Signup successful!")
+                    router.push("/partner/dashboard")
+                },
+                (err) => toast.error(err)
+            )
+        },
+        (err) => {
+            toast.error("OTP verification failed")
+            setLoading(false);
+        }
+    )
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target
@@ -30,47 +52,9 @@ const PartnerSignup = () => {
             toast.error("Please fill in all details")
             return
         }
-
-        await AuthService.sendOtp(
-            {
-                phoneNumber: formData.phone,
-                name: `${formData.firstName} ${formData.lastName}`,
-                role: "PARTNER"
-            },
-            setLoading,
-            (data) => {
-                toast.success("OTP sent to your phone")
-                setStep('otp')
-                if (data.otp) {
-                    console.log("Dev OTP:", data.otp)
-                }
-            },
-            (err) => toast.error(err)
-        )
+        sendOtp(formData.phone)
+        toast.info("Opening OTP widget...")
     }
-
-    const handleVerifyAndSignup = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!formData.otp) {
-            toast.error("Please enter the OTP")
-            return
-        }
-
-        await AuthService.verifyOtp(
-            {
-                phoneNumber: formData.phone,
-                otp: formData.otp
-            },
-            setLoading,
-            () => {
-                toast.success("Signup successful!")
-                router.push("/partner/dashboard")
-            },
-            (err) => toast.error(err)
-        )
-    }
-
-
 
     return (
         <div className="flex min-h-svh flex-col items-center justify-center bg-background p-0 md:p-10">
@@ -81,75 +65,49 @@ const PartnerSignup = () => {
                             <div className="flex flex-col p-4 md:p-12 justify-center">
                                 <div className="space-y-1 text-left mb-8">
                                     <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                                        {step === 'details' ? "Create an account" : "Verify OTP"}
+                                        Create an account
                                     </h1>
                                     <p className="text-sm text-muted-foreground">
-                                        {step === 'details' ? "Join the BWF Partner network" : `Enter the code sent to ${formData.phone}`}
+                                        Join the BWF Partner network via OTP verification
                                     </p>
                                 </div>
 
-                                {step === 'details' ? (
-                                    <form onSubmit={handleSendOTP} className="grid gap-5">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <AppInput
-                                                id="firstName"
-                                                label="First name"
-                                                placeholder="John"
-                                                className="h-11 shadow-sm"
-                                                value={formData.firstName}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                            <AppInput
-                                                id="lastName"
-                                                label="Last name"
-                                                placeholder="Doe"
-                                                className="h-11 shadow-sm"
-                                                value={formData.lastName}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
+                                <form onSubmit={handleSendOTP} className="grid gap-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <AppInput
-                                            id="phone"
-                                            type="tel"
-                                            label="Phone Number"
-                                            placeholder="+1234567890"
+                                            id="firstName"
+                                            label="First name"
+                                            placeholder="John"
                                             className="h-11 shadow-sm"
-                                            value={formData.phone}
+                                            value={formData.firstName}
                                             onChange={handleChange}
                                             required
                                         />
-
-                                        <Button type="submit" className="w-full h-11" disabled={loading}>
-                                            {loading ? "Sending..." : "Send OTP"}
-                                        </Button>
-                                    </form>
-                                ) : (
-                                    <form onSubmit={handleVerifyAndSignup} className="grid gap-5">
                                         <AppInput
-                                            id="otp"
-                                            label="One-Time Password"
-                                            placeholder="123456"
-                                            className="h-11 shadow-sm text-center tracking-widest text-lg font-bold"
-                                            value={formData.otp}
+                                            id="lastName"
+                                            label="Last name"
+                                            placeholder="Doe"
+                                            className="h-11 shadow-sm"
+                                            value={formData.lastName}
                                             onChange={handleChange}
-                                            required
                                         />
+                                    </div>
 
-                                        <Button type="submit" className="w-full h-11" disabled={loading}>
-                                            {loading ? "Verifying..." : "Verify & Sign Up"}
-                                        </Button>
+                                    <AppInput
+                                        id="phone"
+                                        type="tel"
+                                        label="Phone Number"
+                                        placeholder="+1234567890"
+                                        className="h-11 shadow-sm"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        required
+                                    />
 
-                                        <button
-                                            type="button"
-                                            onClick={() => setStep('details')}
-                                            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
-                                        >
-                                            Change phone number
-                                        </button>
-                                    </form>
-                                )}
+                                    <Button type="submit" className="w-full h-11" disabled={loading}>
+                                        {loading ? "Verifying..." : "Register with OTP"}
+                                    </Button>
+                                </form>
 
                                 <div className="mt-8 text-center text-sm">
                                     <span className="text-muted-foreground">Already have an account? </span>
@@ -161,6 +119,7 @@ const PartnerSignup = () => {
                         </div>
                     </CardContent>
                 </Card>
+                <div id="msg91-captcha" className="mt-4 flex justify-center"></div>
                 <div className="mt-8 text-center text-[12px] text-muted-foreground max-w-sm mx-auto">
                     By clicking continue, you agree to our{" "}
                     <a href="#" className="underline hover:text-foreground transition-colors">Terms of Service</a> and{" "}
