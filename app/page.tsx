@@ -4,12 +4,17 @@ import React, { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AppInput } from "@/components/app/input"
-import Link from 'next/link'
+import AuthService from "@/service/auth.service"
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const PartnerLogin = () => {
+    const router = useRouter()
+    const [step, setStep] = useState<'phone' | 'otp'>('phone')
+    const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         phone: '',
-        password: ''
+        otp: ''
     })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,23 +22,67 @@ const PartnerLogin = () => {
         setFormData(prev => ({ ...prev, [id]: value }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSendOTP = async (e: React.FormEvent) => {
         e.preventDefault()
-        console.log('Login Data:', formData)
+        if (!formData.phone) {
+            toast.error("Please enter your phone number")
+            return
+        }
+
+        await AuthService.sendOtp(
+            { phoneNumber: formData.phone },
+            setLoading,
+            (data) => {
+                toast.success("OTP sent successfully")
+                setStep('otp')
+                if (data.otp) {
+                    console.log("Dev OTP:", data.otp)
+                }
+            },
+            (err) => toast.error(err)
+        )
     }
+
+    const handleVerifyOTP = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!formData.otp) {
+            toast.error("Please enter the OTP")
+            return
+        }
+
+        await AuthService.verifyOtp(
+            {
+                phoneNumber: formData.phone,
+                otp: formData.otp
+            },
+            setLoading,
+            () => {
+                toast.success("Logged in successfully!")
+                router.push("/partner/dashboard")
+            },
+            (err) => toast.error(err)
+        )
+    }
+
+
 
     return (
         <div className="flex min-h-svh flex-col items-center justify-center bg-background p-0 md:p-10">
             <div className="w-full max-w-[450px]">
                 <Card className="md:border-border border-none shadow-none rounded-2xl p-0">
                     <CardContent className="p-0">
-                        <form onSubmit={handleSubmit} className="grid grid-cols-1">
-                            <div className="flex flex-col p-4 md:p-12 justify-center">
-                                <div className="space-y-1 text-left mb-8">
-                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
-                                    <p className="text-sm text-muted-foreground">Login to your Partner account</p>
-                                </div>
-                                <div className="grid gap-5">
+                        <div className="flex flex-col p-4 md:p-12 justify-center">
+                            <div className="space-y-1 text-left mb-8">
+                                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                                    {step === 'phone' ? "Welcome back" : "Verify OTP"}
+                                </h1>
+                                <p className="text-sm text-muted-foreground">
+                                    {step === 'phone' ? "Login to your account" : `Enter the code sent to ${formData.phone}`}
+                                </p>
+                            </div>
+
+                            {step === 'phone' ? (
+                                <form onSubmit={handleSendOTP} className="grid gap-5">
                                     <AppInput
                                         id="phone"
                                         type="tel"
@@ -42,38 +91,46 @@ const PartnerLogin = () => {
                                         className="h-11 shadow-sm"
                                         value={formData.phone}
                                         onChange={handleChange}
+                                        required
                                     />
 
+                                    <Button type="submit" className="w-full h-11" disabled={loading}>
+                                        {loading ? "Sending..." : "Send OTP"}
+                                    </Button>
+                                </form>
+                            ) : (
+                                <form onSubmit={handleVerifyOTP} className="grid gap-5">
                                     <AppInput
-                                        id="password"
-                                        type="password"
-                                        label="Password"
-                                        placeholder="Enter your password"
-                                        className="h-11 shadow-sm"
-                                        labelExtra={
-                                            <a href="#" className="text-xs text-muted-foreground hover:text-foreground font-medium underline underline-offset-4 transition-colors">
-                                                Forgot your password?
-                                            </a>
-                                        }
-                                        value={formData.password}
+                                        id="otp"
+                                        label="One-Time Password"
+                                        placeholder="123456"
+                                        className="h-11 shadow-sm text-center tracking-widest text-lg font-bold"
+                                        value={formData.otp}
                                         onChange={handleChange}
+                                        required
                                     />
 
-                                    <Link href={"/onboard"}>
-                                        <Button className="w-full h-11">
-                                            Login
-                                        </Button>
-                                    </Link>
-                                </div>
+                                    <Button type="submit" className="w-full h-11" disabled={loading}>
+                                        {loading ? "Verifying..." : "Verify & Login"}
+                                    </Button>
 
-                                <div className="mt-8 text-center text-sm">
-                                    <span className="text-muted-foreground">Don&apos;t have an account? </span>
-                                    <a href="/signup" className="font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors">
-                                        Sign up
-                                    </a>
-                                </div>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setStep('phone')}
+                                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+                                    >
+                                        Change phone number
+                                    </button>
+                                </form>
+                            )}
+
+                            <div className="mt-8 text-center text-sm">
+                                <span className="text-muted-foreground">Don&apos;t have an account? </span>
+                                <a href="/signup" className="font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors">
+                                    Sign up
+                                </a>
                             </div>
-                        </form>
+                        </div>
                     </CardContent>
                 </Card>
                 <div className="mt-8 text-center text-[12px] text-muted-foreground max-w-sm mx-auto">
@@ -87,6 +144,7 @@ const PartnerLogin = () => {
 }
 
 export default PartnerLogin
+
 
 
 

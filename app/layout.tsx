@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -34,9 +35,11 @@ export default function RootLayout({
         <LanguageProvider>
           <TooltipProvider>
             {children}
+            <Toaster position="top-right" richColors />
           </TooltipProvider>
         </LanguageProvider>
       </body>
     </html>
   );
 }
+

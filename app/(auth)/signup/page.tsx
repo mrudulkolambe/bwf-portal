@@ -4,13 +4,19 @@ import React, { useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AppInput } from "@/components/app/input"
+import AuthService from "@/service/auth.service"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 const PartnerSignup = () => {
+    const router = useRouter()
+    const [step, setStep] = useState<'details' | 'otp'>('details')
+    const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         phone: '',
-        password: ''
+        otp: ''
     })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,66 +24,132 @@ const PartnerSignup = () => {
         setFormData(prev => ({ ...prev, [id]: value }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSendOTP = async (e: React.FormEvent) => {
         e.preventDefault()
-        console.log('Signup Data:', formData)
+        if (!formData.phone || !formData.firstName) {
+            toast.error("Please fill in all details")
+            return
+        }
+
+        await AuthService.sendOtp(
+            {
+                phoneNumber: formData.phone,
+                name: `${formData.firstName} ${formData.lastName}`,
+                role: "PARTNER"
+            },
+            setLoading,
+            (data) => {
+                toast.success("OTP sent to your phone")
+                setStep('otp')
+                if (data.otp) {
+                    console.log("Dev OTP:", data.otp)
+                }
+            },
+            (err) => toast.error(err)
+        )
     }
+
+    const handleVerifyAndSignup = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!formData.otp) {
+            toast.error("Please enter the OTP")
+            return
+        }
+
+        await AuthService.verifyOtp(
+            {
+                phoneNumber: formData.phone,
+                otp: formData.otp
+            },
+            setLoading,
+            () => {
+                toast.success("Signup successful!")
+                router.push("/partner/dashboard")
+            },
+            (err) => toast.error(err)
+        )
+    }
+
+
 
     return (
         <div className="flex min-h-svh flex-col items-center justify-center bg-background p-0 md:p-10">
             <div className="w-full max-w-[850px]">
                 <Card className="md:border-border border-none shadow-none rounded-2xl p-0">
                     <CardContent className="p-0">
-                        <form onSubmit={handleSubmit} className="grid grid-cols-1">
+                        <div className="grid grid-cols-1">
                             <div className="flex flex-col p-4 md:p-12 justify-center">
                                 <div className="space-y-1 text-left mb-8">
-                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">Create an account</h1>
-                                    <p className="text-sm text-muted-foreground">Join the BWF Partner network</p>
+                                    <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                                        {step === 'details' ? "Create an account" : "Verify OTP"}
+                                    </h1>
+                                    <p className="text-sm text-muted-foreground">
+                                        {step === 'details' ? "Join the BWF Partner network" : `Enter the code sent to ${formData.phone}`}
+                                    </p>
                                 </div>
-                                <div className="grid gap-5">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                {step === 'details' ? (
+                                    <form onSubmit={handleSendOTP} className="grid gap-5">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <AppInput
+                                                id="firstName"
+                                                label="First name"
+                                                placeholder="John"
+                                                className="h-11 shadow-sm"
+                                                value={formData.firstName}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                            <AppInput
+                                                id="lastName"
+                                                label="Last name"
+                                                placeholder="Doe"
+                                                className="h-11 shadow-sm"
+                                                value={formData.lastName}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+
                                         <AppInput
-                                            id="firstName"
-                                            label="First name"
-                                            placeholder="John"
+                                            id="phone"
+                                            type="tel"
+                                            label="Phone Number"
+                                            placeholder="+1234567890"
                                             className="h-11 shadow-sm"
-                                            value={formData.firstName}
+                                            value={formData.phone}
                                             onChange={handleChange}
+                                            required
                                         />
+
+                                        <Button type="submit" className="w-full h-11" disabled={loading}>
+                                            {loading ? "Sending..." : "Send OTP"}
+                                        </Button>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={handleVerifyAndSignup} className="grid gap-5">
                                         <AppInput
-                                            id="lastName"
-                                            label="Last name"
-                                            placeholder="Doe"
-                                            className="h-11 shadow-sm"
-                                            value={formData.lastName}
+                                            id="otp"
+                                            label="One-Time Password"
+                                            placeholder="123456"
+                                            className="h-11 shadow-sm text-center tracking-widest text-lg font-bold"
+                                            value={formData.otp}
                                             onChange={handleChange}
+                                            required
                                         />
-                                    </div>
 
-                                    <AppInput
-                                        id="phone"
-                                        type="tel"
-                                        label="Phone Number"
-                                        placeholder="+1234567890"
-                                        className="h-11 shadow-sm"
-                                        value={formData.phone}
-                                        onChange={handleChange}
-                                    />
+                                        <Button type="submit" className="w-full h-11" disabled={loading}>
+                                            {loading ? "Verifying..." : "Verify & Sign Up"}
+                                        </Button>
 
-                                    <AppInput
-                                        id="password"
-                                        type="password"
-                                        label="Password"
-                                        placeholder="Enter your password"
-                                        className="h-11 shadow-sm"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                    />
-
-                                    <Button type="submit" className="w-full h-11">
-                                        Sign Up
-                                    </Button>
-                                </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setStep('details')}
+                                            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+                                        >
+                                            Change phone number
+                                        </button>
+                                    </form>
+                                )}
 
                                 <div className="mt-8 text-center text-sm">
                                     <span className="text-muted-foreground">Already have an account? </span>
@@ -86,7 +158,7 @@ const PartnerSignup = () => {
                                     </a>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </CardContent>
                 </Card>
                 <div className="mt-8 text-center text-[12px] text-muted-foreground max-w-sm mx-auto">
