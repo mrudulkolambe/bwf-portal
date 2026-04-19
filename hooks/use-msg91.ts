@@ -19,7 +19,7 @@ export const useMsg91 = (onSuccess: (data: any) => void, onFailure: (err: any) =
   useEffect(() => {
     const configuration = {
       widgetId: WIDGET_ID,
-      tokenAuth: "395689TnAODxSbx1uQ649c63bbP1", // This is usually handled by MSG91 internally via widgetId but can be added if needed
+      tokenAuth: "395689T4cE12EIGpi69e4eb08P1", // This is usually handled by MSG91 internally via widgetId but can be added if needed
       exposeMethods: true,
       success: (data: any) => {
         console.log('MSG91 Success:', data);
