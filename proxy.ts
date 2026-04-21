@@ -2,23 +2,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
-    const token = request.cookies.get('chargnex-auth-token')?.value;
+    const token = request.cookies.get('bwf-auth-token')?.value;
     const pathname = request.nextUrl.pathname;
-
-    // Internal API URL for current host
     const whoAmIUrl = new URL('/api/auth/who-am-i', request.url).toString();
 
-    const publicRoutes: string[] = [
-        '/',
-        '/signup',
-        '/api/auth',
-    ];
-
+    const publicRoutes = ['/', '/signup', '/api/auth'];
     const isPublicRoute = publicRoutes.some((r) => pathname === r || pathname.startsWith(r + '/'));
 
     if (isPublicRoute) {
         if (token && pathname === '/') {
-            // If logged in and at root, redirect to dashboard
             return NextResponse.redirect(new URL('/partner/dashboard', request.url));
         }
         return NextResponse.next();
@@ -40,29 +32,27 @@ export async function proxy(request: NextRequest) {
 
         if (response.status !== 200) {
             const res = NextResponse.redirect(new URL('/', request.url));
-            res.cookies.delete('chargnex-auth-token');
+            res.cookies.delete('bwf-auth-token');
             return res;
         }
 
-        const responseData = await response.json();
-        const isOnboarded = responseData?.user?.isOnboarded;
+        const { user } = await response.json();
+        const isOnboarded = user?.isOnboarded;
 
-        // Simple onboarding check as per requested logic
+        // Redirect to onboarding if not completed
         if (isOnboarded === false) {
-            if (pathname !== '/onboard') {
+            if (pathname !== '/onboard' && !pathname.startsWith('/onboard/')) {
                 return NextResponse.redirect(new URL('/onboard', request.url));
             }
-        } else {
-            if (pathname === '/' || pathname === '/onboard') {
-                return NextResponse.redirect(new URL('/partner/dashboard', request.url));
-            }
+        } else if (isOnboarded === true && pathname === '/onboard') {
+            return NextResponse.redirect(new URL('/partner/dashboard', request.url));
         }
 
         return NextResponse.next();
     } catch (error) {
         console.error('[Middleware] Auth validation error:', error);
         const res = NextResponse.redirect(new URL('/', request.url));
-        res.cookies.delete('chargnex-auth-token');
+        res.cookies.delete('bwf-auth-token');
         return res;
     }
 }

@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AppInput } from "@/components/app/input"
-import { Camera, Image as ImageIcon, Check } from "lucide-react"
+import { Camera, Image as ImageIcon, Check, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { PARTNER_SERVICES } from "@/lib/constants"
@@ -17,50 +17,117 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from "@/components/providers/language-provider"
 import { LanguageSwitcher } from "@/components/app/language-switcher"
 
+import { storage } from "@/lib/firebase"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import API from "@/lib/api"
+import { toast } from "sonner"
+import AuthService from "@/service/auth.service"
+
 const OnboardPartner = () => {
     const { t } = useTranslation()
     const router = useRouter()
-    const [imagePreview, setImagePreview] = useState<string | null>(null)
-    const [imageKey, setImageKey] = useState(0)
-    const [selectedService, setSelectedService] = useState<string>('')
+    const [loading, setLoading] = useState(false)
+    const [user, setUser] = useState<any>(null)
+    
+    // Form States
     const [businessName, setBusinessName] = useState('')
+    const [selectedService, setSelectedService] = useState<string>('')
     const [location, setLocation] = useState<{ lat: number; lng: number; address?: string } | undefined>()
 
-    // Document States
-    const [aadharImage, setAadharImage] = useState<string | null>(null)
-    const [panImage, setPanImage] = useState<string | null>(null)
+    // Preview States
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [aadharPreview, setAadharPreview] = useState<string | null>(null)
+    const [panPreview, setPanPreview] = useState<string | null>(null)
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    // File States (Actual files to upload)
+    const [profileFile, setProfileFile] = useState<File | null>(null)
+    const [aadharFile, setAadharFile] = useState<File | null>(null)
+    const [panFile, setPanFile] = useState<File | null>(null)
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        AuthService.whoAmI({
+            setLoading: () => {},
+            onSuccess: (data) => setUser(data.user),
+            onError: (err) => {
+                toast.error("Session expired. Please login again.")
+                router.push('/')
+            }
+        })
+    }, [router])
+
+    const handleProfileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            // Revoke old URL if it exists to prevent memory leaks
-            if (imagePreview) URL.revokeObjectURL(imagePreview);
-
-            const url = URL.createObjectURL(file);
-            setImagePreview(url);
-            setImageKey(prev => prev + 1);
+            setProfileFile(file)
+            setImagePreview(URL.createObjectURL(file))
         }
     }
 
-    const triggerFileInput = () => {
-        fileInputRef.current?.click()
+    const handleAadharUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setAadharFile(file)
+            setAadharPreview(URL.createObjectURL(file))
+        }
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        console.log('Onboarding data:', {
-            businessName,
-            imagePreview,
-            selectedService,
-            location,
-            aadharImage,
-            panImage
-        })
+    const handlePanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setPanFile(file)
+            setPanPreview(URL.createObjectURL(file))
+        }
+    }
 
-        // Simulate navigation to dashboard
-        router.push('/partner/dashboard')
+    const uploadFile = async (file: File, folder: string) => {
+        if (!user?.id) throw new Error("User ID not found")
+        // Folder structure: users/{userId}/{folder}/{timestamp}_{filename}
+        const storageRef = ref(storage, `users/${user.id}/${folder}/${Date.now()}_${file.name}`)
+        const snapshot = await uploadBytes(storageRef, file)
+        return await getDownloadURL(snapshot.ref)
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!user?.id) return
+
+        setLoading(true)
+        try {
+            let profileUrl = null
+            let aadharUrl = null
+            let panUrl = null
+
+            // Upload files sequentially or in parallel
+            const uploadPromises = []
+            
+            if (profileFile) uploadPromises.push(uploadFile(profileFile, 'profile').then(url => profileUrl = url))
+            if (aadharFile) uploadPromises.push(uploadFile(aadharFile, 'documents/aadhar').then(url => aadharUrl = url))
+            if (panFile) uploadPromises.push(uploadFile(panFile, 'documents/pan').then(url => panUrl = url))
+
+            await Promise.all(uploadPromises)
+
+            // Submit onboarding data to backend
+            const response = await API.post('/api/user/onboard', {
+                businessName,
+                serviceType: selectedService,
+                location,
+                image: profileUrl,
+                aadharImage: aadharUrl,
+                panImage: panUrl
+            })
+
+            if (response.success) {
+                toast.success("Onboarding completed successfully!")
+                router.push('/partner/dashboard')
+            } else {
+                toast.error(response.message || "Failed to complete onboarding")
+            }
+        } catch (error: any) {
+            console.error('Onboarding upload error:', error)
+            toast.error(error.message || "An error occurred during upload")
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -89,7 +156,6 @@ const OnboardPartner = () => {
                                         >
                                             {imagePreview ? (
                                                 <img
-                                                    key={imageKey}
                                                     src={imagePreview}
                                                     alt="Preview"
                                                     className="w-full h-full object-cover animate-in fade-in duration-300"
@@ -105,7 +171,7 @@ const OnboardPartner = () => {
                                             </div>
                                             <input
                                                 type="file"
-                                                onChange={handleImageUpload}
+                                                onChange={handleProfileUpload}
                                                 accept="image/*"
                                                 className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                 aria-label="Upload profile picture"
@@ -154,10 +220,10 @@ const OnboardPartner = () => {
                                             <div className="flex flex-col gap-2">
                                                 <div className={cn(
                                                     "relative aspect-3/2 rounded-2xl overflow-hidden border-2 border-dashed border-muted-foreground/20 flex items-center justify-center transition-all hover:border-primary/50 group bg-muted/30",
-                                                    aadharImage && "border-solid border-primary/30"
+                                                    aadharPreview && "border-solid border-primary/30"
                                                 )}>
-                                                    {aadharImage ? (
-                                                        <img src={aadharImage} alt="Aadhar" className="w-full h-full object-cover animate-in fade-in duration-300" />
+                                                    {aadharPreview ? (
+                                                        <img src={aadharPreview} alt="Aadhar" className="w-full h-full object-cover animate-in fade-in duration-300" />
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors text-center p-4">
                                                             <CreditCard className="w-6 h-6" />
@@ -166,10 +232,7 @@ const OnboardPartner = () => {
                                                     )}
                                                     <input
                                                         type="file"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (file) setAadharImage(URL.createObjectURL(file));
-                                                        }}
+                                                        onChange={handleAadharUpload}
                                                         accept="image/*"
                                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     />
@@ -180,10 +243,10 @@ const OnboardPartner = () => {
                                             <div className="flex flex-col gap-2">
                                                 <div className={cn(
                                                     "relative aspect-3/2 rounded-2xl overflow-hidden border-2 border-dashed border-muted-foreground/20 flex items-center justify-center transition-all hover:border-primary/50 group bg-muted/30",
-                                                    panImage && "border-solid border-primary/30"
+                                                    panPreview && "border-solid border-primary/30"
                                                 )}>
-                                                    {panImage ? (
-                                                        <img src={panImage} alt="PAN" className="w-full h-full object-cover animate-in fade-in duration-300" />
+                                                    {panPreview ? (
+                                                        <img src={panPreview} alt="PAN" className="w-full h-full object-cover animate-in fade-in duration-300" />
                                                     ) : (
                                                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors text-center p-4">
                                                             <CreditCard className="w-6 h-6" />
@@ -192,10 +255,7 @@ const OnboardPartner = () => {
                                                     )}
                                                     <input
                                                         type="file"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (file) setPanImage(URL.createObjectURL(file));
-                                                        }}
+                                                        onChange={handlePanUpload}
                                                         accept="image/*"
                                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                                     />
@@ -204,8 +264,15 @@ const OnboardPartner = () => {
                                         </div>
                                     </div>
 
-                                    <Button type="submit" className="w-full h-11" disabled={!selectedService || !businessName}>
-                                        {t('auth.complete_onboarding')}
+                                    <Button type="submit" className="w-full h-11" disabled={!selectedService || !businessName || loading}>
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                {t('auth.completing')}...
+                                            </>
+                                        ) : (
+                                            t('auth.complete_onboarding')
+                                        )}
                                     </Button>
                                 </div>
                             </div>

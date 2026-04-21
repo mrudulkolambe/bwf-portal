@@ -20,16 +20,22 @@ enum Role {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  phoneNumber String   @unique
-  email       String?  @unique
-  name        String?
-  image       String?
-  role        Role     @default(CONSUMER)
-  otp         String?
-  otpExpires  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNumber  String    @unique
+  email        String?   @unique
+  name         String?
+  image        String?
+  role         Role      @default(CONSUMER)
+  otp          String?
+  otpExpires   DateTime?
+  isOnboarded  Boolean   @default(false)
+  businessName String?
+  serviceType  String?
+  location     Json?
+  aadharImage  String?
+  panImage     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 

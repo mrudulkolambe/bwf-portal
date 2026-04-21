@@ -34,11 +34,6 @@ export default function RootLayout({
             <Toaster position="top-right" richColors />
           </TooltipProvider>
         </LanguageProvider>
-        <Script
-          id="msg91-otp-script"
-          src="https://verify.msg91.com/otp-provider.js"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );

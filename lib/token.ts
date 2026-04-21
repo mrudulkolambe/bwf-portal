@@ -7,12 +7,12 @@ const getToken = () => {
         }
         return acc;
     }, {} as Record<string, string>);
-    return cookies['chargnex-auth-token'];
+    return cookies['bwf-auth-token'];
 }
 
 const clearToken = () => {
     if (typeof document === 'undefined') return;
-    document.cookie = 'chargnex-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'bwf-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
 
 const setToken = (token: string) => {
@@ -20,7 +20,7 @@ const setToken = (token: string) => {
     // Set cookie for 7 days
     const date = new Date();
     date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
-    document.cookie = `chargnex-auth-token=${token}; expires=${date.toUTCString()}; path=/;`;
+    document.cookie = `bwf-auth-token=${token}; expires=${date.toUTCString()}; path=/;`;
 }
 
 export { getToken, clearToken, setToken }

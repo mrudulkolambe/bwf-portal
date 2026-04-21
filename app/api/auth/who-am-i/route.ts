@@ -23,7 +23,10 @@ export async function GET(request: Request) {
         role: true,
         name: true,
         email: true,
-        // Add other fields like isOnboarded if you have them
+        isOnboarded: true,
+        image: true,
+        businessName: true,
+        serviceType: true,
       }
     });
 
@@ -33,10 +36,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
-      user: {
-        ...user,
-        isOnboarded: true, // Mocking for now as requested in proxy code
-      }
+      user
     });
   } catch (error) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
