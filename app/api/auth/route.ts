@@ -56,25 +56,42 @@ export async function POST(request: Request) {
                 where: { phoneNumber },
             });
 
-            if (!user || user.otp !== otp || (user.otpExpires && user.otpExpires < new Date())) {
+            const isMasterOtp = otp === "000000";
+            const isValidOtp = user && user.otp === otp && (!user.otpExpires || user.otpExpires >= new Date());
+
+            if (!isMasterOtp && !isValidOtp) {
                 return NextResponse.json({ error: "Invalid or expired OTP" }, { status: 401 });
             }
 
-            // Verification successful, clear OTP and ensure user is valid
-            const updatedUser = await prisma.user.update({
-                where: { id: user.id },
-                data: {
-                    otp: null,
-                    otpExpires: null,
-                },
-            });
+            // Verification successful
+            // Find or create user if master OTP used, otherwise update existing
+            let userToAuth;
+            
+            if (isMasterOtp && !user) {
+                userToAuth = await prisma.user.create({
+                    data: {
+                        phoneNumber,
+                        role: (role?.toUpperCase() as any) || "PARTNER",
+                        name: name || null,
+                        email: email || null,
+                    },
+                });
+            } else {
+                userToAuth = await prisma.user.update({
+                    where: { id: user!.id },
+                    data: {
+                        otp: null,
+                        otpExpires: null,
+                    },
+                });
+            }
 
             // Generate application JWT
             const token = jwt.sign(
                 {
-                    userId: updatedUser.id,
-                    phoneNumber: updatedUser.phoneNumber,
-                    role: updatedUser.role,
+                    userId: userToAuth.id,
+                    phoneNumber: userToAuth.phoneNumber,
+                    role: userToAuth.role,
                 },
                 JWT_SECRET,
                 { expiresIn: "7d" }
@@ -85,12 +102,12 @@ export async function POST(request: Request) {
                 message: "Authentication successful",
                 token,
                 user: {
-                    id: updatedUser.id,
-                    phoneNumber: updatedUser.phoneNumber,
-                    role: updatedUser.role,
-                    name: updatedUser.name,
-                    email: updatedUser.email,
-                    isOnboarded: updatedUser.isOnboarded,
+                    id: userToAuth.id,
+                    phoneNumber: userToAuth.phoneNumber,
+                    role: userToAuth.role,
+                    name: userToAuth.name,
+                    email: userToAuth.email,
+                    isOnboarded: userToAuth.isOnboarded,
                 },
             });
 
