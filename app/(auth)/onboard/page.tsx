@@ -17,8 +17,6 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from "@/components/providers/language-provider"
 import { LanguageSwitcher } from "@/components/app/language-switcher"
 
-import { storage } from "@/lib/firebase"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import API from "@/lib/api"
 import { toast } from "sonner"
 import AuthService from "@/service/auth.service"
@@ -80,11 +78,9 @@ const OnboardPartner = () => {
     }
 
     const uploadFile = async (file: File, folder: string) => {
-        if (!user?.id) throw new Error("User ID not found")
-        // Folder structure: users/{userId}/{folder}/{timestamp}_{filename}
-        const storageRef = ref(storage, `users/${user.id}/${folder}/${Date.now()}_${file.name}`)
-        const snapshot = await uploadBytes(storageRef, file)
-        return await getDownloadURL(snapshot.ref)
+        // Mocking upload for now since Firebase is removed
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
+        return `https://api.dicebear.com/7.x/initials/svg?seed=${file.name}`;
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -97,7 +93,7 @@ const OnboardPartner = () => {
             let aadharUrl = null
             let panUrl = null
 
-            // Upload files sequentially or in parallel
+            // Upload files sequentially or in parallel (Mocked)
             const uploadPromises = []
             
             if (profileFile) uploadPromises.push(uploadFile(profileFile, 'profile').then(url => profileUrl = url))
