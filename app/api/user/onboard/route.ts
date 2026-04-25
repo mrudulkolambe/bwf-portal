@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export async function POST(request: Request) {
     try {
-        const token = (await cookies()).get('chargnex-auth-token')?.value;
+        const token = (await cookies()).get('bwf-auth-token')?.value;
 
         if (!token) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
